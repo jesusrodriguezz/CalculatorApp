@@ -20,10 +20,13 @@ Class:
 --*/
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
 
 //
 // defined enum to store the operation
-// type. 
+// types. 
 //
 
 typedef enum {
@@ -41,21 +44,97 @@ typedef enum {
 } OperationType;
 
 //
-// defined struct to hold the number values
-// and result. 
+// Defined the Stack data structure to be used for 
+// operands and operators.
 //
 
 typedef struct {
-   double operand_1;
-   double operand_2;
-   double result;
-   OperationType operation;
-} Calculator;
+   int top;
+   int capacity;
+   double* data;
+} Stack;
 
-int precedence(char op)
+Stack* createStack(int capacity) {
+   Stack* stack = (Stack*)malloc(sizeof(Stack));
+   stack->capacity = capacity;
+   stack->top = -1;
+   stack->data = (double*)malloc(stack->capacity * sizeof(double));
+   return stack;
+}
+
+int isEmpty(Stack* stack)
 /*
 */
 {
+   return stack->top == -1;
+}
+
+void push(Stack* stack, double value)
+/*
+*/
+{
+   if (stack->top == stack->capacity - 1) {
+      stack->capacity *= 2;
+      stack->data = realloc(stack->data, stack->capacity * sizeof(double));
+   }
+
+   stack->data[++stack->top] = value;
+}
+
+double pop(Stack* stack) 
+/*
+*/
+{
+   if (isEmpty(stack)) {
+      printf("Error: Stack overflow\n");
+      exit(1);
+   }
+   
+   return stack->data[stack->top--];
+}
+
+double peek(Stack* stack) 
+/*
+*/
+{
+   if (isEmpty(stack)) {
+      printf("Error: Stack is empty\n");
+      exit(1);
+   }
+
+   return stack->data[stack->top];
+}
+
+
+int precedence(char op)
+/*
+Routine Description:
+
+   This routine determines the level of precedence for the operators.
+
+Arguments:
+
+   op - this is the char value for the type of operation.
+
+Return Value:
+
+   returns the level of precedence for the type of operation if
+   the operation is non exisiting then the level of precedence
+   is zero.
+*/
+{
+   if (op == '+' || op == '-') {
+      return 1;
+   }
+   
+   if (op == '*' || op == '/') {
+      return 2;
+   }
+
+   if (op == '^') {
+      return 3;
+   }
+
    return 0;
 }
 
@@ -151,6 +230,18 @@ Return Value:
 
 double Exponent(double a, double b)
 /*
+Routine Description:
+
+   This routine will perform a ^ b
+
+Arguments:
+
+   a - operand 1
+   b - operand 2 
+
+Return Value:
+
+   result of operand 1 ^ operand 2.
 */
 {
    if (a == 0 && b == 0) {
@@ -161,43 +252,358 @@ double Exponent(double a, double b)
    return pow(a, b);
 }
 
-void PerformOperation(Calculator* calc) 
+double Sin(double a)
 /*
-
 Routine Description:
 
-   This routine will call the function to perform
-   the operation.
+   This routine computes the sine of the input value 
+   using the trigonometric sine function.
 
 Arguments:
 
-   calc - this is just so we can get a refrence to the struct and access the values.
+   a - input value 
 
 Return Value:
 
-   None.
+   The sine of the input value.
 */
 {
-   switch (calc->operation) {
+   return sin(a);
+}
+
+double Cos(double a)
+/*
+Routine Description:
+
+   This routine computes the cosine of the input value using 
+   the trigonometric cosine function.
+
+Arguments:
+
+   a - input value
+
+Return Value:
+
+   The cosine of the input value.
+*/
+{
+   return cos(a);
+}
+
+double Tan(double a)
+/*
+Routine Description:
+
+   This routine computes the tangent of the input value 
+   using the trigonometric tangent function.
+
+Arguments:
+
+   a - input value 
+
+Return Value:
+
+   The tangent of the input value.
+*/
+{
+   return tan(a);
+}
+
+double Cot(double a)
+/*
+Routine Description:
+
+   This routine computes the cotangent of the input value 
+   using the trigonometric cotangent function.
+
+Arguments:
+
+   a - input value 
+
+Return Value:
+
+   The cotangent of the input value.
+*/
+{
+   return 1.0 / tan(a);
+}
+
+double Ln(double a)
+/*
+Routine Description:
+
+   This routine computes the natural logarithm of the input value using the logarithm function.
+
+Arguments:
+
+   a - input value
+
+Return Value:
+
+   The natural logarithm of the input value.
+*/
+{
+   return log(a);
+}
+
+double Log10(double a)
+/*
+Routine Description:
+
+   This routine computes the base-10 logarithm of the input value using the logarithm function.
+
+Arguments:
+
+   a - input value
+
+Return Value:
+
+   The base-10 logarithm of the input value.
+*/
+{
+   return log10(a);
+}
+
+double ApplyOperation(double a, double b, OperationType op)
+/*
+*/
+{
+   switch (op) {
       case ADD:
-         calc->result = Add(calc->operand_1, calc->operand_2);
-         break;
-      case SUBTRACT:
-         calc->result = Subtract(calc->operand_1, calc->operand_2);
-         break;
-      case MULTIPLY:
-         calc->result = Multiply(calc->operand_1, calc->operand_2);
-         break;
-      case DIVIDE:
-         calc->result = Divide(calc->operand_1, calc->operand_2);
-         break;
-      case EXPONENT:
-         calc->result = Exponent(calc->operand_1, calc->operand_2);
-         break;
-      default:
-         printf("\nError: Invalid operation\n");
+         return Add(a, b);
+      case SUBTRACT: 
+         return Subtract(a, b);
+      case MULTIPLY: 
+         return Multiply(a, b);
+      case DIVIDE: 
+         return Divide(a, b);
+      case EXPONENT: 
+         return Exponent(a, b);
+      case SIN:
+         return Sin(a);
+      case COS:
+         return Cos(a);
+      case TAN:
+         return Tan(a);
+      case COT:
+         return Cot(a);
+      case LN:
+         return Ln(a);
+      case LOG10:
+         return Log10(a);
+      default: 
+         return 0;
    }
 }
+
+double evaluateExpression(char* expr) 
+/*
+*/
+{
+   Stack* values = createStack(10);
+   Stack* ops = createStack(10);
+
+   for (int i = 0; expr[i] != '\0'; i++) {
+      char ch = expr[i];
+
+      // Skip whitespace
+      if (isspace(ch)) continue;
+
+      // Handle negative numbers (unary minus)
+      if (ch == '-' && (i == 0 || expr[i - 1] == '(' || strchr("+-*/^", expr[i - 1]))) {
+         double value = 0;
+         double fraction = 0.0;
+         double divisor = 10.0;
+         int isFraction = 0;
+         i++;  // Skip the '-' and start parsing the number
+
+         while (i < strlen(expr) && (isdigit(expr[i]) || expr[i] == '.')) {
+            if (expr[i] == '.') {
+               isFraction = 1;
+            } else {
+               if (isFraction) {
+                  fraction += (expr[i] - '0') / divisor;
+                  divisor *= 10.0;
+               } else {
+                  value = (value * 10) + (expr[i] - '0');
+               }
+            }
+            i++;
+         }
+         i--;  // Step back to correct position
+         value += fraction; // Add fractional part to the whole number
+         value = -value; // Make the number negative
+         push(values, value);
+      }
+      
+      // Handle numbers (push to the value stack)
+      else if (isdigit(ch) || ch == '.') {
+         double value = 0;
+         double fraction = 0.0;
+         double divisor = 10.0;
+         int isFraction = 0;
+
+         while (i < strlen(expr) && (isdigit(expr[i]) || expr[i] == '.')) {
+            if (expr[i] == '.') {
+               isFraction = 1;
+            } else {
+               if (isFraction) {
+                  fraction += (expr[i] - '0') / divisor;
+                  divisor *= 10.0;
+               } else {
+                  value = (value * 10) + (expr[i] - '0');
+               }
+            }
+            i++;
+         }
+         i--; // Step back to correct position
+         value += fraction; // Add fractional part to the whole number
+         push(values, value);
+      }
+
+      // Handle '('
+      else if (ch == '(') {
+         push(ops, ch);
+      }
+
+      // Handle ')'
+      else if (ch == ')') {
+         while (!isEmpty(ops) && peek(ops) != '(') {
+            double val2 = pop(values);
+            double val1 = pop(values);
+            char op = (char)pop(ops);
+            OperationType operation;
+            switch (op) {
+               case '+': operation = ADD; break;
+               case '-': operation = SUBTRACT; break;
+               case '*': operation = MULTIPLY; break;
+               case '/': operation = DIVIDE; break;
+               case '^': operation = EXPONENT; break;
+               default: continue;
+            }
+            push(values, ApplyOperation(val1, val2, operation));
+         }
+         pop(ops);  // Pop '(' from the stack
+      }
+
+      // Handle operators
+      else if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^') {
+         while (!isEmpty(ops) && precedence(peek(ops)) >= precedence(ch)) {
+            double val2 = pop(values);
+            double val1 = pop(values);
+            char op = (char)pop(ops);
+            OperationType operation;
+            switch (op) {
+               case '+': operation = ADD; break;
+               case '-': operation = SUBTRACT; break;
+               case '*': operation = MULTIPLY; break;
+               case '/': operation = DIVIDE; break;
+               case '^': operation = EXPONENT; break;
+               default: continue;
+            }
+            push(values, ApplyOperation(val1, val2, operation));
+         }
+         push(ops, ch);
+      }
+
+      // Handle trigonometric and logarithmic functions
+      else if (strncmp(&expr[i], "sin", 3) == 0) {
+         i += 2;  // Skip 'sin'
+         push(ops, SIN);
+      } else if (strncmp(&expr[i], "cos", 3) == 0) {
+         i += 2;  // Skip 'cos'
+         push(ops, COS);
+      } else if (strncmp(&expr[i], "tan", 3) == 0) {
+         i += 2;  // Skip 'tan'
+         push(ops, TAN);
+      } else if (strncmp(&expr[i], "cot", 3) == 0) {
+         i += 2;  // Skip 'cot'
+         push(ops, COT);
+      } else if (strncmp(&expr[i], "ln", 2) == 0) {
+         i += 1;  // Skip 'ln'
+         push(ops, LN);
+      } else if (strncmp(&expr[i], "log", 3) == 0) {
+         i += 2;  // Skip 'log'
+         push(ops, LOG10);
+      }
+   }
+
+   // Apply remaining operators
+   while (!isEmpty(ops)) {
+      double val1 = 0; 
+      double val2 = pop(values);  // Unary operators only need this
+      char op = (char)pop(ops);  // Get the operator
+
+      OperationType operation;
+      switch (op) {
+         case '+': 
+            operation = ADD; 
+            val1 = pop(values);  
+            break;
+         case '-': 
+            operation = SUBTRACT; 
+            val1 = pop(values);  
+            break;
+         case '*': 
+            operation = MULTIPLY; 
+            val1 = pop(values);  
+            break;
+         case '/': 
+            operation = DIVIDE; 
+            val1 = pop(values);  
+            break;
+         case '^': 
+            operation = EXPONENT; 
+            val1 = pop(values);
+            break;
+
+         // Unary operators (trigonometric and logarithmic)
+         case SIN: 
+            operation = SIN; 
+            break;  
+         case COS: 
+            operation = COS; 
+            break;  
+         case TAN: 
+            operation = TAN; 
+            break;  
+         case COT: 
+            operation = COT; 
+            break;  
+         case LN:  
+            operation = LN; 
+            break; 
+         case LOG10: 
+            operation = LOG10; 
+            break; 
+         default: 
+            continue;  
+      }
+
+      // Apply the operation
+      double result;
+      if (operation == ADD || operation == SUBTRACT || operation == MULTIPLY || 
+         operation == DIVIDE || operation == EXPONENT) {
+         result = ApplyOperation(val1, val2, operation);  // Binary operation
+      } else {
+         result = ApplyOperation(val2, 0, operation);  // Unary operation
+      }
+
+      // Push the result back onto the values stack
+      push(values, result);
+   }
+   // The final result will be the only value in the stack
+   double result = pop(values);
+
+   // Free memory
+   free(values->data);
+   free(values);
+   free(ops->data);
+   free(ops);
+
+   return result;
+}
+
 
 
 int main() {
@@ -207,62 +613,37 @@ int main() {
    printf("-                                          -");
    printf("\n--------------------------------------------\n");
 
-   Calculator calc;
-   char operator;
-   
+   char exp[100];
+
    // 
    // Prompt the user for input.
    //
 
    printf("\n--------------------------------------------\n");
    printf("-                                          -");
-   printf("\n           Enter first operand: ");
-   scanf("%lf", &calc.operand_1);
+   printf("\n  Enter an expression (e.g., (1 + 2) * 3): \n");
    printf("-                                          -");
    printf("\n--------------------------------------------\n");
+   fgets(exp, sizeof(exp), stdin);
+
+   //
+   // Remove newline character
+   //
+
+   exp[strcspn(exp, "\n")] = '\0';  
+
+   // 
+   // Evaluate and print the result for the user input expression
+   //
+
+   double result = evaluateExpression(exp);
 
    printf("\n--------------------------------------------\n");
    printf("-                                          -");
-   printf("\n        Enter operator (+, -, *, /, ^): ");
-   scanf(" %c", &operator);
+   printf("\n           Result: %.2f\n", result);
    printf("-                                          -");
    printf("\n--------------------------------------------\n");
 
-   printf("\n--------------------------------------------\n");
-   printf("-                                          -");
-   printf("\n           Enter second operand: ");
-   scanf("%lf", &calc.operand_2);
-   printf("-                                          -");
-   printf("\n--------------------------------------------\n");
-
-   switch (operator) {
-      case '+':
-         calc.operation = ADD;
-         break;
-      case '-':
-         calc.operation = SUBTRACT;
-         break;
-      case '*':
-         calc.operation = MULTIPLY;
-         break;
-      case '/':
-         calc.operation = DIVIDE;
-         break;
-      case '^':
-         calc.operation = EXPONENT;
-         break;
-      default:
-         printf("Error: Invalid operator\n");
-         return 1;
-   }
-
-   PerformOperation(&calc);
-
-
-   printf("\n--------------------------------------------\n");
-   printf("-                                          -");
-   printf("\n          Result: %.2f %c %.2f = %.2f\n", calc.operand_1, operator, calc.operand_2, calc.result);
-   printf("-                                          -");
-   printf("\n--------------------------------------------\n");
+   return 0;
 
 } 
